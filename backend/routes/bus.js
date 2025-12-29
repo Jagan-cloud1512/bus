@@ -5,11 +5,8 @@ const { Pool } = pkg;
 const router = express.Router();
 
 const pool = new Pool({
-  user: process.env.POSTGRES_USER || "postgres",
-  host: process.env.POSTGRES_HOST || "localhost",
-  database: process.env.POSTGRES_DB || "postgres",
-  password: process.env.POSTGRES_PASSWORD || "Jagan1512",
-  port: parseInt(process.env.POSTGRES_PORT) || 5432,
+  connectionString: process.env.jag, // ← Use "jag" instead of POSTGRES_URL
+  ssl: { rejectUnauthorized: false },
 });
 
 let buses = [
