@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Appointment Booking</title>
+  </head>
+  <body>
+    <h1>Smart Appointment Booking</h1>
+    <button onclick="login('user','pass')">User Login</button>
+    <button onclick="login('admin','admin123')">Admin Login</button>
+    <div id="slots"></div>
+    <script>
+      async function loadSlots() {
+        const res = await fetch("http://localhost:5000/slots");
+        const slots = await res.json();
+        document.getElementById("slots").innerHTML = slots
+          .map(
+            (s) =>
+              `<div>${s.time} <button onclick="book(${s.id})">Book</button></div>`
+          )
+          .join("");
+      }
+      async function login(user, pass) {
+        await fetch("http://localhost:5000/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: user, password: pass }),
+        });
+        loadSlots();
+      }
+      async function book(slotId) {
+        const res = await fetch("http://localhost:5000/book", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slot_id: slotId }),
+        });
+        loadSlots();
+      }
+      loadSlots();
+    </script>
+  </body>
+</html>
