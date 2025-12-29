@@ -1,5 +1,6 @@
 let currentUser = null;
-const API_BASE = "/api/bus";
+const API_BASE =
+  "https://bus-zgob-dfobx81ki-jagan-mummudi-sridhars-projects.vercel.app/";
 
 function showRegister() {
   document.getElementById("signupModal").style.display = "flex";
