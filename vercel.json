@@ -5,19 +5,16 @@
       "destination": "/backend/api/index.js"
     },
     {
+      "source": "/style.css",
+      "destination": "/frontend/style.css"
+    },
+    {
+      "source": "/script.js",
+      "destination": "/frontend/script.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/frontend/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/frontend/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
     }
   ]
 }
