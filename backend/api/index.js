@@ -4,14 +4,10 @@ import busRoutes from "../routes/bus.js";
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Routes - Vercel needs /api prefix
 app.use("/bus", busRoutes);
 
-// Test endpoint
 app.get("/test", (req, res) => {
   res.json({
     message: "🚌 Bus API working!",
@@ -19,5 +15,4 @@ app.get("/test", (req, res) => {
   });
 });
 
-// Vercel Serverless - CRITICAL
 export default app;
