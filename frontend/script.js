@@ -1,5 +1,5 @@
 let currentUser = null;
-const API_BASE = "/bus"; // Perfect for Vercel single deploy
+const API_BASE = "/api"; // Perfect for Vercel single deploy
 
 function showRegister() {
   document.getElementById("signupModal").style.display = "flex";
