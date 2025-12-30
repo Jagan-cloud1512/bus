@@ -1,12 +1,24 @@
-// ✅ VERCEL SERVERLESS - NO ROUTER IMPORT NEEDED
+// ✅ VERCEL SERVERLESS - FIXED CORS + OPTIONS
 import express from "express";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+
+// ✅ FIX 1: Explicit CORS methods
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// GLOBAL DATA
+// ✅ FIX 2: Handle OPTIONS preflight (CRITICAL for 405!)
+app.options("*", cors());
+
+// GLOBAL DATA (YOUR CODE - PERFECT)
 global.busAppData = global.busAppData || {
   users: [{ id: 1, email: "intern", password: "project", role: "admin" }],
   buses: [
@@ -59,7 +71,7 @@ global.busAppData = global.busAppData || {
 
 const data = global.busAppData;
 
-// ✅ ALL ROUTES DIRECTLY HERE (No router import!)
+// YOUR ROUTES (PERFECT - NO CHANGE)
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = data.users.find(
