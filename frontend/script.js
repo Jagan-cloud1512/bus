@@ -1,10 +1,10 @@
 let currentUser = null;
-const API_BASE =
-  "https://bus-zgob-dfobx81ki-jagan-mummudi-sridhars-projects.vercel.app/";
+const API_BASE = "/bus"; // Perfect for Vercel single deploy
 
 function showRegister() {
   document.getElementById("signupModal").style.display = "flex";
 }
+
 function hideRegister() {
   document.getElementById("signupModal").style.display = "none";
 }
@@ -33,7 +33,7 @@ async function login() {
     }
   } catch (err) {
     console.error(err);
-    alert("Server error. Is backend running?");
+    alert("Server error. Refresh and try again.");
   }
 }
 
@@ -51,7 +51,7 @@ async function register() {
     const data = await res.json();
     if (!res.ok) return alert(data.error || "Unable to register");
 
-    alert("Account created! You can login now.");
+    alert("✅ Account created! You can login now.");
     hideRegister();
   } catch (err) {
     console.error(err);
@@ -72,7 +72,7 @@ function logout() {
   window.location.reload();
 }
 
-// ========== USER PAGE (UNCHANGED) ==========
+// ========== USER PAGE ==========
 function showUserPage() {
   hideLoginUI();
   const userPage = document.getElementById("userPage");
@@ -245,7 +245,7 @@ async function userConfirmBooking() {
   }
 }
 
-// ========== COMPLETE ADMIN PANEL ==========
+// ========== ADMIN PANEL ==========
 function showAdminPage() {
   hideLoginUI();
 
@@ -393,8 +393,8 @@ async function loadBusesForAdmin() {
                   `<span class="seat-btn ${
                     seat.available ? "available" : "booked"
                   }" style="font-size: 11px; padding: 4px 8px;">
-                ${seat.seatNo}
-              </span>`
+                    ${seat.seatNo}
+                  </span>`
               )
               .join("")}
           </div>

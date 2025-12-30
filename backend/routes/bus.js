@@ -1,13 +1,8 @@
 import express from "express";
-import pkg from "pg";
-
-const { Pool } = pkg;
 const router = express.Router();
 
-const pool = new Pool({
-  connectionString: process.env.jag, // ← Use "jag" instead of POSTGRES_URL
-  ssl: { rejectUnauthorized: false },
-});
+// IN-MEMORY DATA (No Database!)
+let users = [{ id: 1, email: "intern", password: "project", role: "admin" }];
 
 let buses = [
   {
@@ -39,49 +34,35 @@ let buses = [
 
 let bookings = [];
 
-// AUTH
+// AUTH - In-Memory
 router.post("/register", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
     return res.status(400).json({ error: "Email and password required" });
 
-  try {
-    const result = await pool.query(
-      "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
-      [email, password, "user"]
-    );
-    res.json({ user: result.rows[0] });
-  } catch (err) {
-    if (err.code === "23505")
-      return res.status(400).json({ error: "User already exists" });
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
+  // Check if user exists
+  if (users.find((u) => u.email === email))
+    return res.status(400).json({ error: "User already exists" });
+
+  const newUser = { id: Date.now(), email, password, role: "user" };
+  users.push(newUser);
+  res.json({ user: newUser });
 });
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  try {
-    const result = await pool.query(
-      "SELECT id, email, password, role FROM users WHERE email = $1",
-      [email]
-    );
-    if (!result.rows.length || result.rows[0].password !== password) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-    const user = result.rows[0];
-    res.json({
-      token: user.email,
-      role: user.role || "user",
-      email: user.email,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
+
+  const user = users.find((u) => u.email === email && u.password === password);
+  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+  res.json({
+    token: user.email,
+    role: user.role,
+    email: user.email,
+  });
 });
 
-// BUSES
+// BUSES & BOOKINGS
 router.get("/", (req, res) => res.json(buses));
 router.get("/bookings", (req, res) => res.json(bookings));
 
