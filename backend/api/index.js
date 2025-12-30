@@ -1,15 +1,16 @@
-// ✅ VERCEL NATIVE - NO EXPRESS = NO 405 ERRORS!
 export default function handler(req, res) {
-  // CORS HEADERS FIRST (CRITICAL!)
+  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // OPTIONS preflight
   if (req.method === "OPTIONS") {
     res.status(200).end();
     return;
   }
+
+  // Parse URL path
+  const urlPath = req.url.split("?")[0]; // Remove query params
 
   // GLOBAL DATA
   if (!global.busAppData) {
@@ -87,34 +88,30 @@ export default function handler(req, res) {
       bookings: [],
     };
   }
-
   const data = global.busAppData;
 
-  // LOGIN
-  if (req.method === "POST" && req.url.includes("/login")) {
-    const body = JSON.parse(req.body || "{}");
+  // ROUTES BY URL PATH
+  if (urlPath === "/api") {
+    res.json(data.buses);
+    return;
+  }
+
+  if (req.method === "POST" && urlPath === "/api/login") {
+    const body = req.body ? JSON.parse(req.body) : {};
     const user = data.users.find(
       (u) => u.email === body.email && u.password === body.password
     );
-    if (!user) {
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
-    }
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
     res.json({ token: user.email, role: user.role, email: user.email });
     return;
   }
 
-  // REGISTER
-  if (req.method === "POST" && req.url.includes("/register")) {
-    const body = JSON.parse(req.body || "{}");
-    if (!body.email || !body.password) {
-      res.status(400).json({ error: "Email and password required" });
-      return;
-    }
-    if (data.users.find((u) => u.email === body.email)) {
-      res.status(400).json({ error: "User already exists" });
-      return;
-    }
+  if (req.method === "POST" && urlPath === "/api/register") {
+    const body = req.body ? JSON.parse(req.body) : {};
+    if (!body.email || !body.password)
+      return res.status(400).json({ error: "Email and password required" });
+    if (data.users.find((u) => u.email === body.email))
+      return res.status(400).json({ error: "User already exists" });
     const newUser = {
       id: Date.now(),
       email: body.email,
@@ -126,32 +123,20 @@ export default function handler(req, res) {
     return;
   }
 
-  // GET BUSES
-  if (req.method === "GET" && req.url === "/") {
-    res.json(data.buses);
-    return;
-  }
-
-  // GET BOOKINGS
-  if (req.method === "GET" && req.url.includes("/bookings")) {
+  if (req.method === "GET" && urlPath === "/api/bookings") {
     res.json(data.bookings);
     return;
   }
 
-  // BOOK
-  if (req.method === "POST" && req.url.includes("/book")) {
-    const body = JSON.parse(req.body || "{}");
+  if (req.method === "POST" && urlPath === "/api/book") {
+    const body = req.body ? JSON.parse(req.body) : {};
+    // booking logic (same as before)
     const bus = data.buses.find((b) => b.id === body.busId);
-    if (!bus) {
-      res.status(404).json({ error: "Bus not found" });
-      return;
-    }
+    if (!bus) return res.status(404).json({ error: "Bus not found" });
     const seats = bus.seats.filter((s) => body.seatIds.includes(s.id));
     const unavailable = seats.filter((s) => !s.available);
-    if (unavailable.length) {
-      res.status(400).json({ error: "Seats unavailable" });
-      return;
-    }
+    if (unavailable.length)
+      return res.status(400).json({ error: "Seats unavailable" });
     seats.forEach((s) => (s.available = false));
     const total = seats.reduce((sum, s) => sum + s.price, 0);
     const booking = {
@@ -173,14 +158,11 @@ export default function handler(req, res) {
     return;
   }
 
-  // CANCEL
-  if (req.method === "DELETE" && req.url.includes("/bookings/")) {
-    const id = parseInt(req.url.split("/bookings/")[1]);
+  if (req.method === "DELETE" && urlPath.startsWith("/api/bookings/")) {
+    const id = parseInt(urlPath.split("/api/bookings/")[1]);
     const booking = data.bookings.find((b) => b.id === id);
-    if (!booking) {
-      res.status(404).json({ error: "Booking not found" });
-      return;
-    }
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    // cancel logic (same as before)
     const bus = data.buses.find((b) => b.id === booking.busId);
     if (bus) {
       booking.seats.forEach((seatNo) => {
@@ -193,5 +175,5 @@ export default function handler(req, res) {
     return;
   }
 
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({ error: "Route not found", path: urlPath });
 }
