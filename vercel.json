@@ -1,34 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "backend/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
+  "builds": [{ "src": "backend/server.js", "use": "@vercel/node" }],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/backend/server.js"
-    },
-    {
-      "src": "/favicon.ico",
-      "headers": { "cache-control": "public, max-age=31536000" },
-      "dest": "/frontend/favicon.ico"
-    },
-    {
-      "src": "/style.css",
-      "headers": { "cache-control": "public, max-age=31536000" },
-      "dest": "/frontend/style.css"
-    },
-    {
-      "src": "/script.js",
-      "headers": { "cache-control": "public, max-age=31536000" },
-      "dest": "/frontend/script.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/index.html"
-    }
+    { "src": "/api/bus/(.*)", "dest": "/backend/server.js" },
+    { "src": "/(.*)", "dest": "/frontend/index.html" }
   ]
 }
