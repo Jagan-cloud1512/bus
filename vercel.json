@@ -4,10 +4,6 @@
     {
       "src": "backend/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "backend/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -16,8 +12,12 @@
       "dest": "/backend/server.js"
     },
     {
+      "src": "/favicon.ico",
+      "dest": "/frontend/favicon.ico"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/backend/server.js"
+      "dest": "/frontend/index.html"
     }
   ]
 }
