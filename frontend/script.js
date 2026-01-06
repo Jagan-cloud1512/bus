@@ -1,10 +1,9 @@
 let currentUser = null;
-const API_BASE = "/api"; // Perfect for Vercel
+const API_BASE = "/api/bus";
 
 function showRegister() {
   document.getElementById("signupModal").style.display = "flex";
 }
-
 function hideRegister() {
   document.getElementById("signupModal").style.display = "none";
 }
@@ -33,7 +32,7 @@ async function login() {
     }
   } catch (err) {
     console.error(err);
-    alert("Server error. Refresh and try again.");
+    alert("Server error. Is backend running?");
   }
 }
 
@@ -51,7 +50,7 @@ async function register() {
     const data = await res.json();
     if (!res.ok) return alert(data.error || "Unable to register");
 
-    alert("✅ Account created! You can login now.");
+    alert("Account created! You can login now.");
     hideRegister();
   } catch (err) {
     console.error(err);
@@ -72,7 +71,7 @@ function logout() {
   window.location.reload();
 }
 
-// ========== USER PAGE ==========
+// ========== USER PAGE (UNCHANGED) ==========
 function showUserPage() {
   hideLoginUI();
   const userPage = document.getElementById("userPage");
@@ -125,8 +124,7 @@ function showUserPage() {
 
 async function loadBusesForUser() {
   try {
-    // ✅ FIXED: /api (not /api/)
-    const res = await fetch(`${API_BASE}`);
+    const res = await fetch(API_BASE);
     window.buses = await res.json();
 
     const container = document.getElementById("busList");
@@ -246,7 +244,7 @@ async function userConfirmBooking() {
   }
 }
 
-// ========== ADMIN PANEL ==========
+// ========== COMPLETE ADMIN PANEL ==========
 function showAdminPage() {
   hideLoginUI();
 
@@ -312,7 +310,6 @@ function showAdminTab(tab) {
 
 async function loadBookingsForAdmin() {
   try {
-    // ✅ FIXED: /api/bookings (full path)
     const res = await fetch(`${API_BASE}/bookings`);
     const bookings = await res.json();
 
@@ -364,7 +361,7 @@ async function loadBookingsForAdmin() {
 
 async function loadBusesForAdmin() {
   try {
-    const res = await fetch(`${API_BASE}`);
+    const res = await fetch(API_BASE);
     window.buses = await res.json();
 
     const container = document.getElementById("adminBusesList");
@@ -395,8 +392,8 @@ async function loadBusesForAdmin() {
                   `<span class="seat-btn ${
                     seat.available ? "available" : "booked"
                   }" style="font-size: 11px; padding: 4px 8px;">
-                    ${seat.seatNo}
-                  </span>`
+                ${seat.seatNo}
+              </span>`
               )
               .join("")}
           </div>
@@ -415,7 +412,6 @@ async function cancelBooking(bookingId) {
   if (!confirm("Cancel this booking?")) return;
 
   try {
-    // ✅ FIXED: Full DELETE path
     const res = await fetch(`${API_BASE}/bookings/${bookingId}`, {
       method: "DELETE",
     });

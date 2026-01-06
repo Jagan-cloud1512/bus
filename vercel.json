@@ -1,25 +1,19 @@
 {
-  "functions": {
-    "backend/api/index.js": {
-      "maxDuration": 30
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "/backend/api/index.js"
+      "src": "/api/bus/(.*)",
+      "dest": "/backend/server.js"
     },
     {
-      "source": "/style.css",
-      "destination": "/frontend/style.css"
-    },
-    {
-      "source": "/script.js",
-      "destination": "/frontend/script.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/frontend/index.html"
+      "src": "/(.*)",
+      "dest": "/backend/server.js"
     }
   ]
 }
