@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "backend/server.js": {
-      "runtime": "nodejs18.x"
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/backend/server.js"
     }
-  },
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/backend/server.js" }]
+  ]
 }
