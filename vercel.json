@@ -1,7 +1,9 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/backend/server.js" },
-    { "src": "/(.*)", "dest": "/frontend/index.html" }
-  ]
+  "functions": {
+    "backend/server.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/backend/server.js" }]
 }
