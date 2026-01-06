@@ -4,11 +4,15 @@
     {
       "src": "backend/server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "backend/**/*.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/bus/(.*)",
+      "src": "/api/(.*)",
       "dest": "/backend/server.js"
     },
     {

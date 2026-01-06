@@ -3,15 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <title>Login | Bus Booking</title>
+    <!-- 🎬 Movie → 🚌 Bus -->
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <!-- LOGIN PAGE -->
     <div class="login-container">
+      <!-- Left panel -->
       <div class="login-left">
         <div class="brand">🚌 BusBook</div>
+        <!-- 🎬 MovieBook → 🚌 BusBook -->
         <h1>Welcome back</h1>
         <p>Book your journey across India</p>
+        <!-- Changed text -->
 
         <label class="field-label">Email address</label>
         <input
@@ -39,13 +43,18 @@
         <button class="btn primary" onclick="login()">Sign in</button>
         <button class="btn outline" onclick="showRegister()">Sign up</button>
 
-        <p class="hint">Create account first with any email/password</p>
+        <p class="hint">
+          Demo login: <strong>admin@bus.com</strong> / <strong>admin123</strong>
+          <!-- Changed demo credentials -->
+        </p>
       </div>
 
+      <!-- Right panel -->
       <div class="login-right">
         <div class="illustration-card">
           <div class="illustration-circle"></div>
           <div class="illustration-bus"></div>
+          <!-- Changed class name -->
         </div>
       </div>
     </div>
@@ -66,8 +75,10 @@
       </div>
     </div>
 
-    <!-- USER & ADMIN PAGES -->
+    <!-- USER BOOKING PAGE (shown only when role === 'user') -->
     <div id="userPage" style="display: none"></div>
+
+    <!-- ADMIN PAGE (shown only when role === 'admin') -->
     <div id="adminPage" style="display: none"></div>
 
     <script src="script.js"></script>
