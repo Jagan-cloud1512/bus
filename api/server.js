@@ -17,6 +17,9 @@ const __dirname = path.dirname(__filename);
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
+// ✅ FIX FAVICON 404
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
 // API routes FIRST
 app.use("/api/bus", busRoutes);
 app.get("/api/test", (req, res) => {
@@ -44,3 +47,5 @@ app.listen(PORT, () => {
   console.log(`🚌 API: http://localhost:${PORT}/api/bus`);
   console.log(`🌐 Frontend: http://localhost:${PORT}`);
 });
+
+export default app;
