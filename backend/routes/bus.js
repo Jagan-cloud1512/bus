@@ -1,44 +1,43 @@
 import express from "express";
-
 const router = express.Router();
 
 // -------- IN-MEMORY USERS (NO DB) --------
-// demo users for login
 const users = [
   { email: "admin@bus.com", password: "admin123", role: "admin" },
   { email: "user@bus.com", password: "user123", role: "user" },
 ];
 
-// -------- BUSES & BOOKINGS (IN-MEMORY) --------
-
+// -------- BUSES & BOOKINGS (MATCHES FRONTEND) --------
 let buses = [
   {
     id: 1,
-    name: "Volvo AC Sleeper (BLR-CHN)",
-    seats: [
-      // ← CHANGED: slots → seats (like your bus frontend expects)
-      { id: 1, seatNo: "A1", type: "Sleeper", available: true, price: 1200 },
-      { id: 2, seatNo: "A2", type: "Sleeper", available: true, price: 1200 },
-      { id: 3, seatNo: "B1", type: "Sleeper", available: true, price: 1200 },
-      { id: 4, seatNo: "B2", type: "Sleeper", available: true, price: 1200 },
+    name: "Volvo AC Sleeper",
+    route: "Chennai → Bangalore",
+    type: "AC",
+    slots: [
+      // ✅ FIXED: slots (not seats)
+      { id: 1, time: "22:00", seats: 8, available: true },
+      { id: 2, time: "23:30", seats: 0, available: false },
+      { id: 3, time: "01:30", seats: 12, available: true },
     ],
   },
   {
     id: 2,
-    name: "Semi Sleeper AC (HYD-BLR)",
-    seats: [
-      { id: 5, seatNo: "1", type: "Semi-Sleeper", available: true, price: 900 },
-      { id: 6, seatNo: "2", type: "Semi-Sleeper", available: true, price: 900 },
-      { id: 7, seatNo: "3", type: "Semi-Sleeper", available: true, price: 900 },
+    name: "Sleeper Non-AC",
+    route: "Bangalore → Hyderabad",
+    type: "Sleeper",
+    slots: [
+      // ✅ FIXED: slots (not seats)
+      { id: 4, time: "21:00", seats: 5, available: true },
+      { id: 5, time: "23:00", seats: 18, available: true },
+      { id: 6, time: "02:00", seats: 0, available: false },
     ],
   },
 ];
 
 let bookings = [];
 
-// -------- AUTH (NO DATABASE) --------
-
-// register new user (stored in memory only)
+// -------- AUTH ROUTES --------
 router.post("/register", (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -50,16 +49,12 @@ router.post("/register", (req, res) => {
     return res.status(400).json({ error: "User already exists" });
   }
 
-  const newUser = { email, password, role: "user" };
-  users.push(newUser);
-
-  res.json({ user: { email: newUser.email, role: newUser.role } });
+  users.push({ email, password, role: "user" });
+  res.json({ email, role: "user", token: "fake-jwt" });
 });
 
-// login against in-memory users
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
-
   const user = users.find((u) => u.email === email && u.password === password);
 
   if (!user) {
@@ -67,14 +62,13 @@ router.post("/login", (req, res) => {
   }
 
   res.json({
-    token: user.email, // simple token placeholder
-    role: user.role,
     email: user.email,
+    role: user.role,
+    token: user.email,
   });
 });
 
-// -------- BUSES / BOOKINGS --------
-
+// -------- BUS ROUTES (MATCHES FRONTEND) --------
 router.get("/", (req, res) => {
   res.json(buses);
 });
@@ -84,57 +78,34 @@ router.get("/bookings", (req, res) => {
 });
 
 router.post("/book", (req, res) => {
-  const { busId, seatIds, email } = req.body; // ← CHANGED: slotId/seats → busId/seatIds
+  const { slotId, seats, email } = req.body; // ✅ FIXED: slotId/seats (matches frontend)
 
-  const bus = buses.find((b) => b.seats.find((s) => seatIds.includes(s.id)));
-  const selectedSeats = bus?.seats.filter((s) => seatIds.includes(s.id));
+  // Find bus and slot
+  const bus = buses.find((b) => b.slots.some((s) => s.id === slotId));
+  const slot = bus?.slots.find((s) => s.id === slotId);
 
-  if (!selectedSeats || selectedSeats.some((s) => !s.available)) {
-    return res.status(400).json({ error: "Seats unavailable" });
+  if (!slot || !slot.available || seats > slot.seats) {
+    return res
+      .status(400)
+      .json({ error: "Invalid booking: Slot full or invalid" });
   }
 
-  // Mark seats as booked
-  selectedSeats.forEach((s) => (s.available = false));
-
-  const totalAmount = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  // Book seats
+  slot.seats -= seats;
+  slot.available = slot.seats > 0;
 
   bookings.push({
-    id: Date.now(),
-    email,
     bus: bus.name,
-    busId,
-    seats: selectedSeats.map((s) => s.seatNo),
-    totalAmount,
-    bookingTime: new Date().toLocaleString(),
+    route: bus.route,
+    slotId,
+    seats,
+    email,
+    time: new Date().toLocaleString(),
   });
 
   res.json({
-    success: true,
-    message: `Booked ${selectedSeats.length} seats for ${bus.name}`,
-    booking: {
-      id: bookings[bookings.length - 1].id,
-      seats: selectedSeats.map((s) => s.seatNo),
-      totalAmount,
-    },
+    message: `Booked ${seats} seats for ${bus.name} (${bus.route}) successfully!`,
   });
-});
-
-router.delete("/bookings/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const booking = bookings.find((b) => b.id === id);
-  if (!booking) return res.status(404).json({ error: "Booking not found" });
-
-  // Restore seats
-  const bus = buses.find((b) => b.id === booking.busId);
-  if (bus) {
-    booking.seats.forEach((seatNo) => {
-      const seat = bus.seats.find((s) => s.seatNo === seatNo);
-      if (seat) seat.available = true;
-    });
-  }
-
-  bookings = bookings.filter((b) => b.id !== id);
-  res.json({ success: true, message: "Booking cancelled successfully" });
 });
 
 export default router;
